@@ -4,7 +4,7 @@
  * Compatible Arduino Uno
  * BIBLIOTHÈQUES REQUISES :
  * - Adafruit ST7735 and ST7789 Library
- * - Adafruit GFX Library
+ * (incluse - Adafruit GFX Library)
  *
  * BRANCHEMENT (module SPI) :
  * ---------------------------
@@ -53,10 +53,6 @@ bool commandeComplete = false;
 // courant pour 1 led = 0.060 A max
 // anneau : 24 * 0.06 = 1,44 A
 // bande : 120 * 0.06 = 7,20 A
-
-
-bool take_photo;
-
 bool strip_allowed = true;
 bool ring_allowed = true;
 
@@ -78,16 +74,18 @@ uint32_t color_off = strip.Color(0, 0, 0);
 
 //Appareil photo
 #define APN_PIN 7
+bool take_photo;
 
 //Bouton
 #define BTN_PIN 2
 #define BTN_LED_PIN 6
+volatile bool btn_pushed = false;
 
 #pragma region variables internes
-//volatile bool bouton = false;
+int tempoLedsRing_ms = 1000;
 volatile unsigned long lastInterruptTime = 0;
 const unsigned long DEBOUNCE_DELAY_ms = 1000;
-int t_delay_photo_ms = 2000;
+int t_delay_photo_ms = 2000; //modifié par le PC
 int temps_avant_mise_en_veille_min = 2;
 unsigned long temps_avant_mise_en_veille_ms;
 unsigned long temps_last_photo;
@@ -95,15 +93,17 @@ unsigned long temps_last_photo;
 int i = 0;
 #pragma endregion
 
+
 void bouton_interrupt() {
+  if (btn_pushed)
+    return;
+
   unsigned long now = millis();
   if (now - lastInterruptTime > DEBOUNCE_DELAY_ms) {
-    //bouton = true;
-    
+    btn_pushed = true;
+    Bouton_led(false);
     Serial.println("P");
-    
-    //Bouton_led(false);
-    //photo();
+
     lastInterruptTime = now;
   }
 }
@@ -111,17 +111,14 @@ void bouton_interrupt() {
 #pragma region SETUPS
 
 void setup_TFT() {
-  Serial.println("Initialisation écran TFT ST7735...");
-  // Initialisation selon votre module :
-  // INITR_BLACKTAB  : module avec languette noire (le plus courant pour 128x128)
+  // Initialisation selon  module :
+  // INITR_BLACKTAB  : module avec languette noire
   // INITR_GREENTAB  : module avec languette verte
   // INITR_REDTAB    : module avec languette rouge
   tft.initR(INITR_GREENTAB);
   // 0 = portrait, 1 = paysage, 2 = portrait inversé, 3 = paysage inversé
   tft.setRotation(0);
-
   COULEUR_FOND = NOIR;
-  Serial.println("Écran initialisé !");
 }
 
 void setup_strip() {
@@ -237,22 +234,45 @@ void traiterCommande(String cmd) {
   if (cmd == "R2")
     Bouton_led(true);
 
-  if (cmd[0] == 't'){
-    Serial.println(t_delay_photo_ms);
-    t_delay_photo_ms = cmd.substring(1).toInt();
-    Serial.println(t_delay_photo_ms);
-    //Serial.print("t_delay_photo_ms = ");
-    //Serial.println(t_delay_photo_ms);
-    //take_photo = true;
-    photo();
+  //nouvelle couleur
+  if (cmd[0] == 'c') {
+    cmd.remove(0, 2);  // enlève "c:"
+
+    int r, g, b;
+    int firstComma = cmd.indexOf(',');
+    int secondComma = cmd.indexOf(',', firstComma + 1);
+
+    if (firstComma > 0 && secondComma > firstComma) {
+      r = cmd.substring(0, firstComma).toInt();
+      g = cmd.substring(firstComma + 1, secondComma).toInt();
+      b = cmd.substring(secondComma + 1).toInt();
+      color = strip.Color(r, g, b);
+    }
+    //affiche la couleur 1 seconde
+    AllLedsOn();
+    delay(1000);
   }
 
+  if (cmd[0] == 't') {
+    t_delay_photo_ms = cmd.substring(1).toInt();
+
+    if (!btn_pushed) {
+      //idem que action bouton
+      btn_pushed = true;
+      Bouton_led(false);
+      lastInterruptTime = millis();
+    }
+
+    Serial.print("t recu : ");
+    Serial.println(t_delay_photo_ms);
+    photo();
+  }
 }
 
 void Take_photo(bool value) {
-  digitalWrite(APN_PIN, !value);
+  digitalWrite(APN_PIN, value);
   Serial.print("take_photo ");
-  Serial.println(!value);
+  Serial.println(value);
 }
 
 void Bouton_led(bool value) {
@@ -264,7 +284,7 @@ void Bouton_led(bool value) {
 
 void loop() {
 
-  switch_pixel();
+  //switch_pixel();
 
   if (temps_avant_mise_en_veille_ms < 0)
     photo();
@@ -281,26 +301,22 @@ void loop() {
   temps_avant_mise_en_veille_ms = millis() - temps_last_photo;
 }
 
-// 📥 Méthode Arduino appelée automatiquement
+// Méthode Arduino
 void serialEvent() {
   while (Serial.available()) {
     char inChar = (char)Serial.read();
 
     if (inChar == '\n') {
-        traiterCommande(inputString);
-        // Reset
-        inputString = "";
-    } else {
-      inputString += inChar;
-    }
+      traiterCommande(inputString);
+      // Reset
+      inputString = "";
+    } else
+      inputString += inChar;    
   }
 }
 
-
-
 #pragma region TFT
 void TFT_print(String val_txt, int x, int y) {
-
   int taille_X = val_txt.length() * 6;
   tft.setTextSize(1);
   tft.fillRect(x, y, taille_X, 10, COULEUR_FOND);
@@ -309,25 +325,15 @@ void TFT_print(String val_txt, int x, int y) {
   tft.setCursor(x, y);
   tft.println(val_txt);
 
-  Serial.println(val_txt);
+  Serial.println("tft : " + val_txt);
 }
 
 void TFT_clear() {
   tft.fillScreen(COULEUR_FOND);
 }
-
-bool tft_pixel = HIGH;
-void switch_pixel() {
-  if (tft_pixel)
-    tft.drawPixel(120, 10, VERT);
-  else
-    tft.drawPixel(120, 10, ROUGE);
-  tft_pixel = !tft_pixel;
-}
 #pragma endregion
 
 void photo() {
-  //bouton = false;
   i++;
   TFT_print(String(i), 20, 95);
 
@@ -335,7 +341,7 @@ void photo() {
   long now = millis();
   //timer sur leds
   AllLedsOn();
-  TempoLedsStrip(t_delay_photo_ms);  //val_delay_cs);
+  TempoLedsStrip(t_delay_photo_ms);
   Serial.print("PHOTO ");
   Serial.print(millis() - now);
   Serial.print(" -> ");
@@ -349,6 +355,7 @@ void photo() {
   Take_photo(false);
 
   Bouton_led(true);
+  btn_pushed = false;
 
   //tempo pour empêcher la mise en veille de l'appareil photo
   temps_last_photo = now + temps_avant_mise_en_veille_ms;
@@ -357,19 +364,19 @@ void photo() {
 #pragma region RGB strip& ring
 void AllLedsOn() {
   //tout ON
-  for (int i = 0; i < strip.numPixels(); i++) {  // For each pixel in strip...
-    strip.setPixelColor(sLEDS[i], color);        //  Set pixel's color
-  }
+  for (int i = 0; i < strip.numPixels(); i++)  // For each pixel in strip...
+    strip.setPixelColor(sLEDS[i], color);      // Set pixel's color
 
-  for (int i = 0; i < ring.numPixels(); i++) {  // For each pixel in strip...
-    ring.setPixelColor(rleds[i], color);        //  Set pixel's color
-  }
+  for (int i = 0; i < ring.numPixels(); i++)   // For each pixel in strip...
+    ring.setPixelColor(rleds[i], color);       // Set pixel's color
 
-  strip.show();  //  Update strip to match
+  strip.show(); // Update strip to match
   ring.show();
 }
 
 void TempoLedsStrip(float temps_ms) {
+  temps_ms -= tempoLedsRing_ms;
+
   if (temps_ms < 0)
     temps_ms = 0;
 
@@ -383,16 +390,20 @@ void TempoLedsStrip(float temps_ms) {
 }
 
 void TempoLedsRing() {
-  for (int j = 0; j < 6; j++) {
+  int nbrclignotement = 5;
+  int tempo1LedsRing_ms = tempoLedsRing_ms / nbrclignotement;
+  tempo1LedsRing_ms /= 2;
+
+  for (int j = 0; j < nbrclignotement + 1; j++) {
     for (int i = 0; i < ring.numPixels(); i++)
       ring.setPixelColor(rleds[i], color);
     ring.show();
-    delay(125);
+    delay(tempo1LedsRing_ms);
 
     for (int i = 0; i < ring.numPixels(); i++)
       ring.setPixelColor(rleds[i], color_off);
     ring.show();
-    delay(125);
+    delay(tempo1LedsRing_ms);
   }
 }
 
@@ -406,6 +417,9 @@ void rainbowFade2White(int wait, int rainbowLoops, int whiteLoops) {
   // advance around the wheel at a decent clip.
 
   for (uint32_t firstPixelHue = 0; firstPixelHue < (uint32_t)rainbowLoops * 65536UL; firstPixelHue += 256) {
+    if (btn_pushed)  //ABORD si bouton enfoncé
+      return;
+
     if (strip_allowed) {
       for (int i = 0; i < strip.numPixels(); i++) {  // For each pixel in strip...
         // Offset pixel hue by an amount to make one full revolution of the

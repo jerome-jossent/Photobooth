@@ -13,35 +13,27 @@ MonoBehaviour:
   m_Name: SpriteColorDatabase
   m_EditorClassIdentifier: Assembly-CSharp::SpriteColorDatabase
   combinations:
-  - name: feuille
+  - name: Feuille
     sprite: {fileID: -7847826088378217533, guid: a819d44812545f843b585be43bd39133, type: 3}
-    color: {r: 0.32401326, g: 0.8301887, b: 0.2741188, a: 1}
-    weight: 0
-  - name: feu
+    color: {r: 0.070114136, g: 1, b: 0, a: 1}
+  - name: Feu
     sprite: {fileID: 1055948177144655584, guid: a819d44812545f843b585be43bd39133, type: 3}
-    color: {r: 0.9215687, g: 0.3019608, b: 0.227451, a: 1}
-    weight: 0
-  - name: eau
+    color: {r: 1, g: 0.09082035, b: 0, a: 1}
+  - name: Eau
     sprite: {fileID: -5353674511194799541, guid: a819d44812545f843b585be43bd39133, type: 3}
-    color: {r: 0.22745094, g: 0.6662129, b: 0.92156863, a: 1}
-    weight: 0
-  - name: "\xE9lectricit\xE9"
+    color: {r: 0, g: 0.8565049, b: 1, a: 1}
+  - name: Energie
     sprite: {fileID: -8998637836017577956, guid: a819d44812545f843b585be43bd39133, type: 3}
-    color: {r: 0.92156863, g: 0.74639446, b: 0.22745094, a: 1}
-    weight: 0
-  - name: esprit
+    color: {r: 1, g: 0.96848667, b: 0, a: 1}
+  - name: Psycho
     sprite: {fileID: -3535178288578553557, guid: a819d44812545f843b585be43bd39133, type: 3}
-    color: {r: 0.7220969, g: 0.22745094, b: 0.92156863, a: 1}
-    weight: 0
-  - name: noir
-    sprite: {fileID: -5026061668967260120, guid: a819d44812545f843b585be43bd39133, type: 3}
-    color: {r: 0.16981131, g: 0.16464932, b: 0.16286933, a: 1}
-    weight: 0
-  - name: force
+    color: {r: 0.79018116, g: 0, b: 1, a: 1}
+  - name: Force
     sprite: {fileID: 6113019995677138560, guid: a819d44812545f843b585be43bd39133, type: 3}
-    color: {r: 0.8238993, g: 0.3673266, b: 0.20986106, a: 1}
-    weight: 0
-  - name: gris
+    color: {r: 0.8301887, g: 0.37174165, b: 0.023495764, a: 1}
+  - name: Shadow
+    sprite: {fileID: -5026061668967260120, guid: a819d44812545f843b585be43bd39133, type: 3}
+    color: {r: 0.2460543, g: 0.38847047, b: 0.5471698, a: 1}
+  - name: Gris
     sprite: {fileID: -5543862623556201130, guid: a819d44812545f843b585be43bd39133, type: 3}
-    color: {r: 0.6289307, g: 0.6289307, b: 0.6289307, a: 1}
-    weight: 0
+    color: {r: 0.44025147, g: 0.44025147, b: 0.44025147, a: 1}

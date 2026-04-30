@@ -17,6 +17,14 @@ public class SpriteColorLoader : MonoBehaviour
 
     string previous_theme_name = "";
 
+    public static SpriteColorLoader _instance;
+
+    private void Awake()
+    {
+        _instance = this;
+    }
+
+
     private void Update()
     {
         if (change)
