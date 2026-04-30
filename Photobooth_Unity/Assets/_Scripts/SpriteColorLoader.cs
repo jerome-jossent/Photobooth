@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class SpriteColorLoader : MonoBehaviour
 {
     [Header("Configuration")]
-    [SerializeField] private SpriteColorDatabase database;
+    private SpriteColorDatabase database;
     [SerializeField] private Image targetImage;
     [SerializeField] private RoundedFrame bordure;
 
@@ -22,8 +22,17 @@ public class SpriteColorLoader : MonoBehaviour
     private void Awake()
     {
         _instance = this;
-    }
 
+        if (database == null)
+        {
+            database = Resources.Load<SpriteColorDatabase>("SpriteColorDatabase");
+
+            if (database == null)
+                Debug.LogError("SpriteColorDatabase introuvable dans Resources !");
+            else
+                Debug.Log("Database chargée depuis Resources !");
+        }
+    }
 
     private void Update()
     {
@@ -34,13 +43,13 @@ public class SpriteColorLoader : MonoBehaviour
         }
     }
 
-
     private void Start()
     {
+        Debug.Log($"[SCL] Start - database: {(database != null ? database.name : "NULL")}");
+        Debug.Log($"[SCL] Combinations count: {database?.combinations?.Count ?? -1}");
+
         if (loadOnStart)
-        {
             LoadRandomCombination();
-        }
     }
 
     // Charger une combinaison aléatoire
@@ -52,11 +61,23 @@ public class SpriteColorLoader : MonoBehaviour
             return;
         }
 
+        // Sécurité : si une seule combinaison, on l'applique directement
+        if (database.combinations.Count == 1)
+        {
+            ApplyCombination(database.combinations[0]);
+            return;
+        }
+
         SpriteColorCombination combo;
+        int maxAttempts = 10;
+        int attempts = 0;
+
         do
         {
             combo = database.GetRandomCombination();
-        } while (previous_theme_name == combo.name);
+            attempts++;
+        } while (previous_theme_name == combo.name && attempts < maxAttempts);
+
         previous_theme_name = combo.name;
         ApplyCombination(combo);
     }

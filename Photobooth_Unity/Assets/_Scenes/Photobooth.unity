@@ -4075,7 +4075,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9962bdbd64842c46919d9b903d9b09d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  database: {fileID: 11400000, guid: 7ef70d8039a2d2a4ba356d0ac9455db5, type: 2}
   targetImage: {fileID: 485230946}
   bordure: {fileID: 1363133171}
   loadOnStart: 1
