@@ -41,13 +41,14 @@ public class Photoing : MonoBehaviour
         // Assurer alpha = 1 à la fin
         fadeImage.color = new Color(color.r, color.g, color.b, 1f);
 
-        //Changement de theme
-        SpriteColorLoader._instance.LoadRandomCombination();
-
         // Attendre 1 secondes
         yield return new WaitForSeconds(t_masque);
         fadeImage.color = new Color(color.r, color.g, color.b, 0f);
 
         fadeImage.gameObject.SetActive(false);
+
+        //Changement de theme
+        yield return new WaitForSeconds(2000); // temps visu disponible 2 sec, 10 sec
+        SpriteColorLoader._instance.LoadRandomCombination();
     }
 }

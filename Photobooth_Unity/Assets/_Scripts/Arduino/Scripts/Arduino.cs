@@ -15,6 +15,9 @@ public class Arduino : MonoBehaviour
     int _messagesMax = 300;
     public int _messages_Count { get { return _messages.Count; } }
 
+    Thread _readThread;
+    bool _running = false;
+
     #region "Parametres"
     private SerialPort _mySerialPort;
     private string _port;
@@ -91,6 +94,11 @@ public class Arduino : MonoBehaviour
             MySerialPort.Open();
             Debug.Log("Connexion au port " + Port + " à " + Baud + "bps.");
 
+            _running = true;
+            _readThread = new Thread(ReadLoop);
+            _readThread.IsBackground = true;
+            _readThread.Start();
+
             SendMessage(""); //purge (premier message foiré, donc je le foire immédiatement)
 
             NewMessage("Connexion : ok");
@@ -106,6 +114,8 @@ public class Arduino : MonoBehaviour
 
     public bool PortCom_OFF()
     {
+        _running = false;
+
         if (MySerialPort == null) return true;
         try
         {
@@ -120,35 +130,49 @@ public class Arduino : MonoBehaviour
         }
     }
 
-    void Update()
+    void ReadLoop() // tourne en dehors du thread Unity
     {
-        ReadLine();
-    }
-
-    void ReadLine()
-    {
-        if (MySerialPort != null && MySerialPort.IsOpen)
+        while (_running && MySerialPort != null && MySerialPort.IsOpen)
         {
-            string strData = null;
             try
             {
-                strData = MySerialPort.ReadLine(); // blocking call.
-                NewMessage(strData);
+                string line = MySerialPort.ReadLine(); // bloquant, attend le \n complet
+                NewMessage(line); // thread-safe grâce au lock existant
             }
-            catch (Exception ex)
-            {
-                switch (ex.Message)
-                {
-                    case "The operation has timed out.":
-                        break;
-
-                    default:
-                        Debug.Log(ex.Message);
-                        break;
-                }
-            }
+            catch (TimeoutException) { }
+            catch (Exception ex) { Debug.Log(ex.Message); }
         }
     }
+
+    //void Update()
+    //{
+    //    ReadLine();
+    //}
+
+    //void ReadLine()
+    //{
+    //    if (MySerialPort != null && MySerialPort.IsOpen)
+    //    {
+    //        string strData = null;
+    //        try
+    //        {
+    //            strData = MySerialPort.ReadLine(); // blocking call.
+    //            NewMessage(strData);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            switch (ex.Message)
+    //            {
+    //                case "The operation has timed out.":
+    //                    break;
+
+    //                default:
+    //                    Debug.Log(ex.Message);
+    //                    break;
+    //            }
+    //        }
+    //    }
+    //}
 
     void NewMessage(string strData)
     {

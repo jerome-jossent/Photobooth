@@ -1068,6 +1068,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2423936064327317527, guid: db2f3584272377949a1d20d229f0de65, type: 3}
+      propertyPath: wheelsCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2423936064327317527, guid: db2f3584272377949a1d20d229f0de65, type: 3}
+      propertyPath: startingAngle
+      value: 260
+      objectReference: {fileID: 0}
+    - target: {fileID: 2423936064327317527, guid: db2f3584272377949a1d20d229f0de65, type: 3}
       propertyPath: OnColorChange.m_PersistentCalls.m_Calls.Array.size
       value: 0
       objectReference: {fileID: 0}
@@ -1149,11 +1157,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8661538647081363120, guid: db2f3584272377949a1d20d229f0de65, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 80
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 8661538647081363120, guid: db2f3584272377949a1d20d229f0de65, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 80
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 8661538647081363120, guid: db2f3584272377949a1d20d229f0de65, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 8661538647081363120, guid: db2f3584272377949a1d20d229f0de65, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -20
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
