@@ -45,9 +45,7 @@ public class SpriteColorLoader : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log($"[SCL] Start - database: {(database != null ? database.name : "NULL")}");
-        Debug.Log($"[SCL] Combinations count: {database?.combinations?.Count ?? -1}");
-
+        Debug.Log($"SpriteColorLoader : Combinations count {database?.combinations?.Count ?? -1}");
         if (loadOnStart)
             LoadRandomCombination();
     }
@@ -85,10 +83,9 @@ public class SpriteColorLoader : MonoBehaviour
     // Appliquer une combinaison spécifique
     public void ApplyCombination(SpriteColorCombination combo)
     {
-        if (combo == null || targetImage == null)
-        {
+        if (combo == null || targetImage == null)        
             return;
-        }
+        
         targetImage.sprite = combo.sprite;
         bordure.SetBorderColor(combo.color);
 

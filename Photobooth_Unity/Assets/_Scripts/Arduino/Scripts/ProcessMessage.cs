@@ -20,6 +20,23 @@ public class ProcessMessage : MonoBehaviour
                 _PrendPhoto();
                 break;
 
+            case "Connexion : ok":
+            case "TFT ok":
+            case "RGB strip ok":
+            case "RGB ring ok":
+            case "BTN ok":
+            case "APN ok":
+
+            case "bouton_led False":
+            case "bouton_led True":
+            case "take_photo False":
+            case "take_photo True":
+                break;
+
+            case "Photobooth Ready":
+//activer logo ?
+                break;
+
             default:
                 Debug.Log($"_Process({txt}) à gérer !");
                 break;

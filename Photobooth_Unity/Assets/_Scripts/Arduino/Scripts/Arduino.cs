@@ -77,16 +77,10 @@ public class Arduino : MonoBehaviour
 
     public bool PortCom_ON()
     {
-        //if (Baud == "")
-        //    GetBaud();
-
         try
         {
-            //utilisation des paramètres
             MySerialPort = new SerialPort(Port, int.Parse(Baud));
-            MySerialPort.ReadTimeout = 1;
-
-            //attribution en interne des autres paramètres nécessaires
+            MySerialPort.ReadTimeout = 500; // thread dédié, pas besoin d'être agressif
             MySerialPort.Parity = Parity.None;
             MySerialPort.StopBits = StopBits.One;
             MySerialPort.DataBits = 8;
@@ -94,14 +88,15 @@ public class Arduino : MonoBehaviour
             MySerialPort.Open();
             Debug.Log("Connexion au port " + Port + " à " + Baud + "bps.");
 
+            MySerialPort.DiscardInBuffer();
+            MySerialPort.DiscardOutBuffer();
+
             _running = true;
             _readThread = new Thread(ReadLoop);
             _readThread.IsBackground = true;
             _readThread.Start();
 
-            SendMessage(""); //purge (premier message foiré, donc je le foire immédiatement)
-
-            NewMessage("Connexion : ok");
+            StartCoroutine(_PurgeAfterDelay()); // purge unique, après 500ms
             return true;
         }
         catch (Exception ex)
@@ -110,6 +105,13 @@ public class Arduino : MonoBehaviour
             NewMessage("Connexion : " + ex.Message);
             return false;
         }
+    }
+
+    IEnumerator _PurgeAfterDelay()
+    {
+        yield return new WaitForSeconds(0.5f); // attend 500ms (Arduino reboot ~300ms)
+        SendMessage("");
+        NewMessage("Connexion : ok");
     }
 
     public bool PortCom_OFF()
@@ -200,10 +202,11 @@ public class Arduino : MonoBehaviour
     {
         try
         {
-            if (MySerialPort ==null || !MySerialPort.IsOpen)
+            if (MySerialPort == null || !MySerialPort.IsOpen)
                 return false;
 
-            MySerialPort?.WriteLine(texte); //write LINE, pas juste write !
+            MySerialPort.WriteLine(texte);
+            MySerialPort.BaseStream.Flush();
             Debug.Log("SendMessage : " + texte);
             return true;
         }
