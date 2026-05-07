@@ -315,7 +315,7 @@ void ProcessPhoto() {
 
   Bouton_led(true);
   btn_pushed = false;
-
+  interrompre_rainbow = false;
   temps_last_photo = now + temps_avant_mise_en_veille_ms;
 }
 
@@ -335,7 +335,7 @@ void loop() {
   // après ProcessPhoto()
   if (take_photo) {
       ProcessPhoto();
-      interrompre_rainbow = false;
+      //interrompre_rainbow = false;
   }
 
   // effet arc en ciel sur les bandes de leds
